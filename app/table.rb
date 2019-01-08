@@ -10,7 +10,7 @@ class Table
 #  private
 
   def create_grid
-    grid = Array.new(3) { Array.new(3) }
+    grid = Array.new(@rows) { Array.new(@cols) }
     @mine_coordinates.each do |(x,y)|
       grid[x][y] = 'x'
     end
@@ -25,10 +25,16 @@ class Table
   end
 
   def fields_arround x,y
-    [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].map do |(x_dir,y_dir)|
-      [x + x_dir, y + y_dir]
-    end.select do |(x1,y1)|
-      x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols
+   # [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].map do |(x_dir,y_dir)|
+   #   [x + x_dir, y + y_dir]
+   # end.select do |(x1,y1)|
+   #   x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols
+   # end
+    [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].inject([]) do |select, (x_dir,y_dir)|
+      x1 = x + x_dir
+      y1 = y + y_dir
+      select << [x1, y1] if x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols
+      select
     end
   end
 
