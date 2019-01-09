@@ -24,12 +24,21 @@ class Table
     grid
   end
 
+  def inspect
+    total = ""
+    between = "+-" * @cols + "+"
+    total += between
+    @grid.each do |row|
+      pipe = "\n    " + "|"
+      row.each do |field|
+        pipe += field.to_s + "|"
+      end
+      total += (pipe += "\n    " + between)
+    end
+    total
+  end
+
   def fields_arround x,y
-   # [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].map do |(x_dir,y_dir)|
-   #   [x + x_dir, y + y_dir]
-   # end.select do |(x1,y1)|
-   #   x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols
-   # end
     [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].inject([]) do |select, (x_dir,y_dir)|
       x1 = x + x_dir
       y1 = y + y_dir
@@ -45,5 +54,3 @@ class Table
   end
 
 end
-
-Table.new(3, 3, [[1,2],[2,0]])
