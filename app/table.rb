@@ -1,3 +1,4 @@
+require 'terminal-table'
 class Table
 
   def initialize rows, cols, mine_coordinates
@@ -25,17 +26,25 @@ class Table
   end
 
   def inspect
-    total = ""
-    between = "+-" * @cols + "+"
-    total += between
-    @grid.each do |row|
-      pipe = "\n    " + "|"
-      row.each do |field|
-        pipe += field.to_s + "|"
+    #total = ""
+    #between = "+-" * @cols + "+"
+    #total += between
+    #@grid.each do |row|
+    #  pipe = "\n    " + "|"
+    #  row.each do |field|
+    #    pipe += field.to_s + "|"
+    #  end
+    #  total += (pipe += "\n    " + between)
+    #end
+    #total
+
+    table = Terminal::Table.new do |t|
+      @grid.each do |row|
+        t << row
       end
-      total += (pipe += "\n    " + between)
+      t.style = {:all_separators => true}
     end
-    total
+    "\n#{table}"
   end
 
   def fields_arround x,y
