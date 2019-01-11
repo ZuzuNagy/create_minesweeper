@@ -1,2 +1,4 @@
+require 'terminal-table'
+
 require './app/table'
-puts "Hello minesweeper"
+require './app/field'

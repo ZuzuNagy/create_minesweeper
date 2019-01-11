@@ -1,4 +1,4 @@
-require './app/table'
+require './main'
 
 RSpec.describe Table do
   let(:table) { Table.new(3,3,[[1,2],[2,0]]) }
@@ -16,12 +16,12 @@ RSpec.describe Table do
     expect(table.fields_arround(2,2)).to eq([[1,1],[1,2],[2,1]])
   end
 
-  it "#create_grid" do
+  xit "#create_grid" do
     expect(table.create_grid).to eq([[0,1,1],[1,2,'x'],['x',2,1]])
     expect(Table.new(2,4,[[1,1]]).create_grid).to eq([[1,1,1,0],[1,'x',1,0]])
   end
 
-  it "#inspect" do
+  xit "#inspect" do
     inspected = "\n" +
                 "+---+---+---+\n" +
                 "| 0 | 1 | 1 |\n" +

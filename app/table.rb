@@ -13,12 +13,12 @@ class Table
   def create_grid
     grid = Array.new(@rows) { Array.new(@cols) }
     @mine_coordinates.each do |(x,y)|
-      grid[x][y] = 'x'
+      grid[x][y] = Field.new('x')
     end
     @rows.times do |x|
       @cols.times do |y|
         if grid[x][y].nil?
-          grid[x][y] = mines_count_arround(x,y)
+          grid[x][y] = Field.new(mines_count_arround(x,y))
         end
       end
     end
