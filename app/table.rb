@@ -1,5 +1,9 @@
 require 'terminal-table'
+require './main'
+
 class Table
+
+  attr_reader :grid
 
   def initialize rows, cols, mine_coordinates
     @rows = rows
@@ -13,16 +17,20 @@ class Table
   def create_grid
     grid = Array.new(@rows) { Array.new(@cols) }
     @mine_coordinates.each do |(x,y)|
-      grid[x][y] = Field.new('x')
+      grid[x][y] = Field.new('x', self)
     end
     @rows.times do |x|
       @cols.times do |y|
         if grid[x][y].nil?
-          grid[x][y] = Field.new(mines_count_arround(x,y))
+          grid[x][y] = Field.new(mines_count_arround(x,y), self)
         end
       end
     end
     grid
+  end
+
+  def [] x, y
+    grid[x][y]
   end
 
   def inspect
@@ -40,7 +48,7 @@ class Table
 
     table = Terminal::Table.new do |t|
       @grid.each do |row|
-        t << row
+        t << row.map(&:inspect)
       end
       t.style = {:all_separators => true}
     end
@@ -54,6 +62,27 @@ class Table
       select << [x1, y1] if x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols
       select
     end
+  end
+
+#  def each_field_around x, y, &block
+#    inject([]) do |select,(x_dir, y_dir)|
+#      x1 = x + x_dir
+#      y1 = y + y_dir
+#      select << block.call((x1, y1)) if x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols
+#      select
+#    end
+#  end
+
+  def pick (x, y)
+    self[x,y].pick
+  end
+
+  def mark (x,y)
+    self[x,y].mark
+  end
+
+  def unmark (x,y)
+    self[x,y].unmark
   end
 
   def mines_count_arround x,y
