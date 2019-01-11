@@ -1,3 +1,16 @@
 # minesweeper
 
-A megadott paraméterekkel létrehoz egy kétdimenziós tömböt, melyben a megadott koordinátákkal elhelyezi az "x"-el jelölt aknákat. Ezek után végignézi az összes helyet és megszámolja hány akna van a megadott logika alapján, majd kiírja a megfelelő számot.
+> Aknakereső kezdeti alkalmazás
+
+## Mit csinál
+
+* Megadott sor-oszlop paraméterekkel létre hoz egy táblát
+* A megadott koodinátákra elhelyezi az aknákat
+* Kiszámolja az adott mező körüli aknákat
+  * Kiírja a számot a mezőbe
+* Kirajzolja az egész táblát
+
+## Mi kell hozzá
+
+    $ bundle install
+    $ rspec
