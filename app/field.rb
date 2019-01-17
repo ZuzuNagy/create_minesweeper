@@ -1,52 +1,51 @@
 class Field
 
-  attr_reader :state
-
   def initialize value, table
-    @state = :untouched
+    @state = 0
     @value = value
     @table = table
   end
 
+  def value
+    @value if picked?
+  end
+
   def mark
-    @state = :marked unless @state == :picked
-    @table
+    send(:state=, :marked) unless picked?
   end
 
   def pick
-    @state = :picked unless @state == :marked
-    @table
+    send(:state=, :picked) unless marked?
   end
 
   def unmark
-    @state = :untouched if @state == :marked
-    @table
+    send(:state=, :untouched) if marked?
   end
 
-#  def untouched?
-#    @state == :untouched
-#  end
-#
-#  def picked?
-#    @state == :picked
-#  end
-#
-#  def marked?
-#    @state == :marked
-#  end
+  STATES = [:untouched, :marked, :picked]
 
-  [:untouched, :marked, :picked].each do |method|
-    define_method(method.to_s + "?") do
-      @state == method
+  STATES.each_with_index do |method, index|
+    define_method "#{method}?" do
+      @state == index
     end
   end
 
+  def state
+    STATES[@state]
+  end
 
   def inspect
     case @state
-    when :untouched then " "
-    when :marked then "M"
-    when :picked then @value.to_s
+    when 0 then " "
+    when 1 then "M"
+    when 2 then @value.to_s
     end
   end
+
+  private
+
+  def state= state
+    @state = STATES.index(state)
+  end
+
 end

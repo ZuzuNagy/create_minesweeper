@@ -25,6 +25,19 @@ RSpec.describe Field do
     end
   end
 
+  describe '#value' do
+    it 'returns @value if state is picked.' do
+      field.pick
+      expect(field.value).to eq(0)
+    end
+
+    it 'returns nil if state is not picked.' do
+      expect(field.value).to be_nil
+      field.mark
+      expect(field.value).to be_nil
+    end
+  end
+
   describe "#mark" do
     it 'changes state to :marked.' do
       expect { field.mark }.to change(field, :state).to(:marked)
@@ -33,10 +46,6 @@ RSpec.describe Field do
     it 'does nothing if state is :picked.' do
       field.pick
       expect { field.mark }.not_to change(field, :state)
-    end
-
-    it 'returns the table.' do
-      expect(field.mark).to eq table
     end
   end
 
@@ -48,10 +57,6 @@ RSpec.describe Field do
     it 'does nothing if state is :marked.' do
       field.mark
       expect { field.pick }.not_to change(field, :state)
-    end
-
-    it 'returns the table.' do
-      expect(field.pick).to eq table
     end
   end
 
@@ -68,10 +73,6 @@ RSpec.describe Field do
     it 'does nothing if state :picked.' do
       field.pick
       expect { field.unmark }.not_to change(field, :state)
-    end
-
-    it 'returns the table.' do
-      expect(field.unmark).to eq table
     end
   end
 
@@ -133,6 +134,21 @@ RSpec.describe Field do
     end
     it 'return false if state is :untouched.' do
       expect(field).not_to be_marked
+    end
+  end
+
+  describe '#state' do
+    it 'returns the symbol value of the state.' do
+      expect { field.mark }.to change(field, :state).to :marked
+      expect { field.unmark }.to change(field, :state).to :untouched
+      expect { field.pick }.to change(field, :state).to :picked
+    end
+  end
+
+  describe '(private) #state=' do
+    it 'changes the state to the given value.' do
+      expect { field.send(:state=, :picked) }.to change(field, :state).to :picked
+      expect { field.send(:state=, :marked) }.to change(field, :state).to :marked
     end
   end
 end

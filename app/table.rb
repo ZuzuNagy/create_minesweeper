@@ -12,8 +12,6 @@ class Table
     @grid = create_grid
   end
 
-#  private
-
   def create_grid
     grid = Array.new(@rows) { Array.new(@cols) }
     @mine_coordinates.each do |(x,y)|
@@ -22,7 +20,7 @@ class Table
     @rows.times do |x|
       @cols.times do |y|
         if grid[x][y].nil?
-          grid[x][y] = Field.new(mines_count_arround(x,y), self)
+          grid[x][y] = Field.new(mines_count_around(x,y), self)
         end
       end
     end
@@ -34,18 +32,6 @@ class Table
   end
 
   def inspect
-    #total = ""
-    #between = "+-" * @cols + "+"
-    #total += between
-    #@grid.each do |row|
-    #  pipe = "\n    " + "|"
-    #  row.each do |field|
-    #    pipe += field.to_s + "|"
-    #  end
-    #  total += (pipe += "\n    " + between)
-    #end
-    #total
-
     table = Terminal::Table.new do |t|
       @grid.each do |row|
         t << row.map(&:inspect)
@@ -55,40 +41,44 @@ class Table
     "\n#{table}"
   end
 
-  def fields_arround x,y
-    [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].inject([]) do |select, (x_dir,y_dir)|
+  def each_field_around x, y, &block
+    [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].each do |(x_dir,y_dir)|
       x1 = x + x_dir
       y1 = y + y_dir
-      select << [x1, y1] if x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols
-      select
+      block.call([x1, y1]) if x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols
     end
   end
 
-#  def each_field_around x, y, &block
-#    inject([]) do |select,(x_dir, y_dir)|
-#      x1 = x + x_dir
-#      y1 = y + y_dir
-#      select << block.call((x1, y1)) if x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols
-#      select
-#    end
-#  end
-
-  def pick (x, y)
-    self[x,y].pick
-  end
-
-  def mark (x,y)
-    self[x,y].mark
-  end
-
-  def unmark (x,y)
-    self[x,y].unmark
-  end
-
-  def mines_count_arround x,y
-    fields_arround(x,y).count do |coor|
-      @mine_coordinates.include?(coor)
+  [:pick, :mark, :unmark].each do |method|
+    define_method(method) do |x,y|
+      send(:[], x , y).send(method)
+      self
     end
+  end
+
+  def mines_count_around x,y
+    count = 0
+    each_field_around(x,y) do |coordinate|
+      count += 1 if @mine_coordinates.include?(coordinate)
+    end
+    count
+  end
+
+  def marked_count_around x,y
+    marked_count = 0
+    each_field_around(x,y) do |coordinate|
+      marked_count += 1 if self[*coordinate].marked?
+    end
+    marked_count
+  end
+
+  def pick_around x,y
+    if self[x,y].value&.<= marked_count_around(x,y)
+      each_field_around(x,y) do |coordinate|
+        self[*coordinate].pick
+      end
+    end
+    self
   end
 
 end
