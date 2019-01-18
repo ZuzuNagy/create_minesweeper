@@ -49,9 +49,17 @@ class Table
     end
   end
 
-  [:pick, :mark, :unmark].each do |method|
+  [:mark, :unmark].each do |method|
     define_method(method) do |x,y|
       send(:[], x , y).send(method)
+      self
+    end
+  end
+
+  def pick x,y
+    if self[x,y].untouched?
+      self[x,y].pick
+      pick_around(x,y) if self[x,y].value == 0
       self
     end
   end
@@ -74,11 +82,18 @@ class Table
 
   def pick_around x,y
     if self[x,y].value&.<= marked_count_around(x,y)
-      each_field_around(x,y) do |coordinate|
-        self[*coordinate].pick
-      end
+      each_field_around(x,y) { |coordinate| pick(*coordinate) }
     end
     self
   end
 
+#  def all_untouched_field_in_the_table x,y
+#
+#  end
+#
+#  def picked_mine x,y
+#    if self[x,y].picked? && self[x,y].value == 'x'
+#
+#    end
+#  end
 end

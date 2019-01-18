@@ -9,11 +9,17 @@ RSpec.describe Table do
     expect(table.mines_count_around(2,2)).to eq(1)
   end
 
-  xit '#each_field_around' do
-    expect(table.each_field_around(1,1).size).to eq(8)
-    expect(table.each_field_around(1,1)).to eq([[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[2,2]])
-    expect(table.each_field_around(0,0)).to eq([[0,1],[1,0],[1,1]])
-    expect(table.each_field_around(2,2)).to eq([[1,1],[1,2],[2,1]])
+  it '#each_field_around' do
+    coordinates = []
+    b = proc { |coordinate| coordinates << coordinate }
+      table.each_field_around(1,1, &b)
+      expect(coordinates).to eq([[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[2,2]])
+    coordinates = []
+      table.each_field_around(0,0, &b)
+    expect(coordinates).to eq([[0,1],[1,0],[1,1]])
+    coordinates = []
+      table.each_field_around(2,2, &b)
+    expect(coordinates).to eq([[1,1],[1,2],[2,1]])
   end
 
   xit "#create_grid" do
@@ -49,6 +55,19 @@ RSpec.describe Table do
   describe '#pick' do
     it 'picks the field at x,y.' do
       expect { table.pick(1,1) }.to change(table[1,1], :picked?).to(true)
+    end
+    it 'picks the field at x,y and picks around x,y if x,y value is zero.' do
+      fields = [[0,0],[0,1],[1,0],[1,1]].map { |(x,y)| table[x,y] }
+      expect { table.pick(0,0) }.to change { fields.all? &:picked? }.to true
+    end
+    it 'calls pick_around again, if a new picked field is zero.' do
+      table = Table.new(3,3, [[2,1]])
+      fields = [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]].map { |(x,y)| table[x,y] }
+      expect { table.pick(0,0) }.to change { fields.all? &:picked? }.to true
+    end
+    it 'does nothing if field at x,y is marked.' do
+      table.mark(0,0)
+      expect { table.pick(0,0) }.not_to change(table[0,0], :picked?)
     end
     it 'returns the table.' do
       expect(table.pick(1,1)).to eq table
@@ -87,39 +106,13 @@ RSpec.describe Table do
     end
   end
 
-  describe '#pick_around' do
-    before :each do
-      table.pick(0,0)
-      table.pick(1,1)
-      table.pick(2,2)
-      table.mark(1,2)
-    end
-
-    it 'changes the x,y field around state to :picked if enough is marked.' do
-      untouched_fields_around = []
-      table.each_field_around(0,0) { |x,y| untouched_fields_around << table[x,y] if table[x,y].untouched? }
-      table.pick_around(0,0)
-      expect(untouched_fields_around).to all be_picked
-
-      untouched_fields_around = []
-      table.each_field_around(2,2) { |x,y| untouched_fields_around << table[x,y] if table[x,y].untouched? }
-      table.pick_around(2,2)
-      expect(untouched_fields_around).to all be_picked
-    end
-
-    it 'does nothing if not enough field is marked around x, y.' do
-      untouched_fields_around = []
-      table.each_field_around(1,1) { |x,y| untouched_fields_around << table[x,y] if table[x,y].untouched? }
-      table.pick_around(1,1)
-      expect(untouched_fields_around).to all be_untouched
-    end
-
-    it 'does nothing if field at x, y is not picked.' do
-      untouched_fields_around = []
-      table.each_field_around(0,2) { |x,y| untouched_fields_around << table[x,y] if table[x,y].untouched? }
-      table.pick_around(0,2)
-      expect(untouched_fields_around).to all be_untouched
-    end
-  end
+#  describe '#picked_mine' do
+#    it 'change all untouched field state to picked.' do
+#      all_untouched_field_in_the table
+#      table.picked_mine(1,2)
+#
+#      expect(table.picked_mine(1,2)).to be
+#    end
+#  end
 
 end
