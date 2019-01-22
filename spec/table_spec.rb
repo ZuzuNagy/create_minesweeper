@@ -3,23 +3,44 @@ require './main'
 RSpec.describe Table do
   let(:table) { Table.new(3,3,[[1,2],[2,0]]) }
 
+#  it '#initialize' do
+#    expect(table).to eq([[nil,nil,nil],[nil,nil,nil],[nil,nil,nil]])
+#  end
+
   it "#mines_count_around" do
     expect(table.mines_count_around(0,0)).to eq(0)
     expect(table.mines_count_around(1,1)).to eq(2)
     expect(table.mines_count_around(2,2)).to eq(1)
   end
 
-  it '#each_field_around' do
-    coordinates = []
-    b = proc { |coordinate| coordinates << coordinate }
-      table.each_field_around(1,1, &b)
-      expect(coordinates).to eq([[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[2,2]])
-    coordinates = []
-      table.each_field_around(0,0, &b)
-    expect(coordinates).to eq([[0,1],[1,0],[1,1]])
-    coordinates = []
-      table.each_field_around(2,2, &b)
-    expect(coordinates).to eq([[1,1],[1,2],[2,1]])
+  describe '#each_coordinate_around' do
+    context 'with block' do
+      let(:coordinates) { [] }
+      let(:b) { proc { |coordinate| coordinates << coordinate } }
+
+      it 'calls the block with coordinates around x,y.' do
+        table.each_coordinate_around(1,1, &b)
+        expect(coordinates).to eq([[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[2,2]])
+        coordinates.clear
+        table.each_coordinate_around(0,0, &b)
+        expect(coordinates).to eq([[0,1],[1,0],[1,1]])
+        coordinates.clear
+        table.each_coordinate_around(2,2, &b)
+        expect(coordinates).to eq([[1,1],[1,2],[2,1]])
+      end
+      it 'returns an array with coordinates around x,y.' do
+        expect(table.each_coordinate_around(0,0, &b)).to be_an_instance_of(Array)
+        expect(table.each_coordinate_around(0,0, &b)).to eq([[0,1],[1,0],[1,1]])
+      end
+    end
+    context 'without block' do
+      it 'returns an enumerator.' do
+        expect(table.each_coordinate_around(1,1)).to be_an_instance_of(Enumerator)
+      end
+      it 'contains coordinates around x,y.' do
+        expect(table.each_coordinate_around(0,0).to_a).to eq([[0,1],[1,0],[1,1]])
+      end
+    end
   end
 
   xit "#create_grid" do
@@ -106,13 +127,14 @@ RSpec.describe Table do
     end
   end
 
-#  describe '#picked_mine' do
-#    it 'change all untouched field state to picked.' do
-#      all_untouched_field_in_the table
-#      table.picked_mine(1,2)
-#
-#      expect(table.picked_mine(1,2)).to be
-#    end
-#  end
+  describe '.create' do
+    it 'returns Table instance, calls generate_grid, chose some coordinates.' do
+      grid = Table.generate_grid(3,3)
+      #expect(Table).to receive(:generate_grid).with(3,3).and_return(grid)
+      coordinates = Table.create(3,3,2).instance_variable_get(:@mine_coordinates)
+      expect(coordinates.size).to eq(2)
+      expect(grid).to include *coordinates
+    end
+  end
 
 end
