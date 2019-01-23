@@ -38,7 +38,7 @@ class Table
       end
       t.style = {:all_separators => true}
     end
-    "\n#{table}"
+    "#{@mine_coordinates.size - each_field.count { |field| field.marked? }}\n#{table}"
   end
 
   def each_coordinate_around x, y
@@ -76,6 +76,22 @@ class Table
       #      yielder << coordinate if in_table
       #    end
       #  end
+    end
+  end
+
+  def each_field
+    coordinates = send(:class).coordinates_for(@rows, @cols)
+    if block_given?
+      coordinates.map do |(x,y)|
+        yield(self[x,y])
+        self[x,y]
+      end
+    else
+      Enumerator.new do |yielder|
+        coordinates.each do |(x,y)|
+          yielder << self[x,y]
+        end
+      end
     end
   end
 
@@ -123,18 +139,22 @@ class Table
     [[x1,y1], x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols]
   end
 
-  def self.create rows, cols, mines_count
-    mine_coordinates = generate_grid(rows, cols).sample(mines_count)
-      new(rows, cols, mine_coordinates)
-  end
+  class << self
 
-  def self.generate_grid rows, cols
-    (0...rows).inject([]) do |coor, x|
-      (0...cols).each do |y|
-        coor << [x,y]
-      end
-      coor
+    def create rows, cols, mines_count
+      mine_coordinates = coordinates_for(rows, cols).sample(mines_count)
+      new(rows, cols, mine_coordinates)
     end
+
+    def coordinates_for rows, cols
+      (0...rows).inject([]) do |coor, x|
+        (0...cols).each do |y|
+          coor << [x,y]
+        end
+        coor
+      end
+    end
+
   end
 
 end
