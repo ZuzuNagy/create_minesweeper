@@ -48,16 +48,50 @@ RSpec.describe Table do
     expect(Table.new(2,4,[[1,1]]).create_grid).to eq([[1,1,1,0],[1,'x',1,0]])
   end
 
-  it "#inspect" do
-    inspected = "\n" +
-                "+---+---+---+\n" +
-                "|   |   |   |\n" +
-                "+---+---+---+\n" +
-                "|   |   |   |\n" +
-                "+---+---+---+\n" +
-                "|   |   |   |\n" +
-                "+---+---+---+"
-    expect(table.inspect).to eq(inspected)
+  describe "#inspect" do
+    it 'draws a table.' do
+      drawn_table =
+        "+---+---+---+\n" +
+        "|   |   |   |\n" +
+        "+---+---+---+\n" +
+        "|   |   |   |\n" +
+        "+---+---+---+\n" +
+        "|   |   |   |\n" +
+        "+---+---+---+"
+      expect(table.inspect).to include drawn_table
+    end
+    it 'shows the number of unmarked mines.' do
+      expect(table.inspect).to include("2\n")
+      table.mark(1,2)
+      expect(table.inspect).to include("1\n")
+      table.mark(0,0)
+      expect(table.inspect).to include("0\n")
+    end
+  end
+
+  describe '#each_field' do
+    let(:fields) { [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]].map { |(x,y)| table[x,y] } }
+    context 'block_given' do
+      let(:fields_picked) { [] }
+      let(:b) { proc { |field| fields_picked << field.picked? } }
+
+      it 'calls the block for each field.' do
+        table.each_field(&b)
+        expect(fields_picked).to eq([false] * 9)
+      end
+      it 'returns fields of the table in an array.' do
+        expect(table.each_field(&b)).to be_an_instance_of(Array)
+        expect(table.each_field(&b)).to eq(fields)
+      end
+    end
+    context 'without block' do
+      it 'returns an enumerator.' do
+        expect(table.each_field).to be_an_instance_of(Enumerator)
+      end
+      it 'contains fields.'do
+        expect(table.each_field.to_a).to eq(fields)
+      end
+    end
   end
 
   describe '#grid' do
@@ -129,11 +163,19 @@ RSpec.describe Table do
 
   describe '.create' do
     it 'returns Table instance, calls generate_grid, chose some coordinates.' do
-      grid = Table.generate_grid(3,3)
-      #expect(Table).to receive(:generate_grid).with(3,3).and_return(grid)
-      coordinates = Table.create(3,3,2).instance_variable_get(:@mine_coordinates)
-      expect(coordinates.size).to eq(2)
-      expect(grid).to include *coordinates
+      table = Table.create(4,5,6)
+      mine_coordinates = table.instance_variable_get(:@mine_coordinates)
+      expect(mine_coordinates.size).to eq(6)
+      expect(mine_coordinates).to be_an_instance_of(Array)
+      all_inside = mine_coordinates.all? { |coor| coor[0] >= 0 && coor[1] >= 0 && coor[0] < 4 && coor[1] < 5 }
+      expect(all_inside).to be true
+    end
+  end
+
+  describe '.coordinates_for' do
+    it 'returns coordinates for grid.' do
+      expect(Table.coordinates_for(2,3)).to eq([[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]])
+      expect(Table.coordinates_for(3,2)).to eq([[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]])
     end
   end
 
