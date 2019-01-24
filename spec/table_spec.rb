@@ -43,11 +43,6 @@ RSpec.describe Table do
     end
   end
 
-  xit "#create_grid" do
-    expect(table.create_grid).to eq([[0,1,1],[1,2,'x'],['x',2,1]])
-    expect(Table.new(2,4,[[1,1]]).create_grid).to eq([[1,1,1,0],[1,'x',1,0]])
-  end
-
   describe "#inspect" do
     it 'draws a table.' do
       drawn_table =
