@@ -12,20 +12,24 @@ class Table
     @grid = create_grid
   end
 
-  def create_grid
-    grid = Array.new(@rows) { Array.new(@cols) }
-    @mine_coordinates.each do |(x,y)|
-      grid[x][y] = Field.new('x', self)
+  class << self
+
+    def create rows, cols, mines_count
+      mine_coordinates = coordinates_for(rows, cols).sample(mines_count)
+      new(rows, cols, mine_coordinates)
     end
-    @rows.times do |x|
-      @cols.times do |y|
-        if grid[x][y].nil?
-          grid[x][y] = Field.new(mines_count_around(x,y), self)
+
+    def coordinates_for rows, cols
+      (0...rows).inject([]) do |coor, x|
+        (0...cols).each do |y|
+          coor << [x,y]
         end
+        coor
       end
     end
-    grid
+
   end
+
 
   def [] x, y
     grid[x][y]
@@ -39,6 +43,21 @@ class Table
       t.style = {:all_separators => true}
     end
     "#{@mine_coordinates.size - each_field.count { |field| field.marked? }}\n#{table}"
+  end
+
+  [:mark, :unmark].each do |method|
+    define_method(method) do |x,y|
+      send(:[], x , y).send(method)
+      self
+    end
+  end
+
+  def pick x,y
+    if self[x,y].untouched?
+      self[x,y].pick
+      pick_around(x,y) if self[x,y].value == 0
+      self
+    end
   end
 
   def each_coordinate_around x, y
@@ -95,20 +114,6 @@ class Table
     end
   end
 
-  [:mark, :unmark].each do |method|
-    define_method(method) do |x,y|
-      send(:[], x , y).send(method)
-      self
-    end
-  end
-
-  def pick x,y
-    if self[x,y].untouched?
-      self[x,y].pick
-      pick_around(x,y) if self[x,y].value == 0
-      self
-    end
-  end
 
   def mines_count_around x,y
     count = 0
@@ -139,22 +144,21 @@ class Table
     [[x1,y1], x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols]
   end
 
-  class << self
+  private
 
-    def create rows, cols, mines_count
-      mine_coordinates = coordinates_for(rows, cols).sample(mines_count)
-      new(rows, cols, mine_coordinates)
+  def create_grid
+    grid = Array.new(@rows) { Array.new(@cols) }
+    @mine_coordinates.each do |(x,y)|
+      grid[x][y] = Field.new('x', self)
     end
-
-    def coordinates_for rows, cols
-      (0...rows).inject([]) do |coor, x|
-        (0...cols).each do |y|
-          coor << [x,y]
+    @rows.times do |x|
+      @cols.times do |y|
+        if grid[x][y].nil?
+          grid[x][y] = Field.new(mines_count_around(x,y), self)
         end
-        coor
       end
     end
-
+    grid
   end
 
 end
