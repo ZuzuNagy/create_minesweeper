@@ -3,10 +3,6 @@ require './main'
 RSpec.describe Table do
   let(:table) { Table.new(3,3,[[1,2],[2,0]]) }
 
-#  it '#initialize' do
-#    expect(table).to eq([[nil,nil,nil],[nil,nil,nil],[nil,nil,nil]])
-#  end
-
   it "#mines_count_around" do
     expect(table.mines_count_around(0,0)).to eq(0)
     expect(table.mines_count_around(1,1)).to eq(2)
@@ -119,8 +115,8 @@ RSpec.describe Table do
       table.mark(0,0)
       expect { table.pick(0,0) }.not_to change(table[0,0], :picked?)
     end
-    it 'returns the table.' do
-      expect(table.pick(1,1)).to eq table
+    it 'returns the field.' do
+      expect(table.pick(1,1)).to eq table[1,1]
     end
   end
 
@@ -129,7 +125,7 @@ RSpec.describe Table do
       expect { table.mark(1,2) }.to change(table[1,2], :marked?).to(true)
     end
     it 'returns the table.' do
-      expect(table.mark(1,2)).to eq table
+      expect(table.mark(1,2)).to eq table[1,2]
     end
   end
 
@@ -139,7 +135,7 @@ RSpec.describe Table do
       expect { table.unmark(1,2) }.to change(table[1,2], :untouched?).to(true)
     end
     it 'return the table.' do
-      expect(table.unmark(1,2)).to eq table
+      expect(table.unmark(1,2)).to eq table[1,2]
     end
   end
 
@@ -174,4 +170,22 @@ RSpec.describe Table do
     end
   end
 
+  describe '#unmarked_mines_count' do
+    it 'returns a number of unmarked mines.' do
+      expect(table.unmarked_mines_count).to eq(2)
+      table.mark(1,2)
+      expect(table.unmarked_mines_count).to eq(1)
+      table.mark(0,0)
+      expect(table.unmarked_mines_count).to eq(0)
+    end
+  end
+
+  describe '#pick_around' do
+    it 'changes x,y field around state, if x,y value eq marked fields around.' do
+      table.mark(2,0)
+      table.pick(1,0)
+      untouched_fields_around = table.each_coordinate_around(1,0).inject([]) { |fields,(x,y)| fields << table[x,y] if table[x,y].untouched?; fields }
+      expect { table.pick_around(1,0) }.to change { untouched_fields_around.all? &:picked?  }.to true
+    end
+  end
 end

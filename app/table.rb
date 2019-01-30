@@ -48,7 +48,7 @@ class Table
   [:mark, :unmark].each do |method|
     define_method(method) do |x,y|
       send(:[], x , y).send(method)
-      self
+      self[x,y]
     end
   end
 
@@ -56,7 +56,7 @@ class Table
     if self[x,y].untouched?
       self[x,y].pick
       pick_around(x,y) if self[x,y].value == 0
-      self
+      self[x,y]
     end
   end
 
@@ -142,6 +142,10 @@ class Table
     x1 = x+x_dir
     y1 = y+y_dir
     [[x1,y1], x1 >= 0 && y1 >= 0 && x1 < @rows && y1 < @cols]
+  end
+
+  def unmarked_mines_count
+    @mine_coordinates.size - each_field.count(&:marked?)
   end
 
   private
