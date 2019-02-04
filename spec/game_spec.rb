@@ -8,6 +8,12 @@ RSpec.describe Game do
       subject.mark(0,0)
       expect(subject.table[0,0]).to be_marked
     end
+    it 'empties message.' do
+      subject.pick_around(0,0)
+      expect(subject.inspect).to include "Not enough marked fields"
+      subject.mark(0,1)
+      expect(subject.inspect).not_to include "Not enough marked fields"
+    end
     it 'returns the game.' do
       expect(subject.mark(0,0)).to eq subject
     end
@@ -30,6 +36,14 @@ RSpec.describe Game do
       expect(subject).to receive(:win)
       subject.pick(0,1)
     end
+    it 'empties message.' do
+      table = Table.new(3,3, [[1,1]], subject)
+      subject.instance_variable_set :@table, table
+      subject.pick_around(0,0)
+      expect(subject.inspect).to include "Not enough marked fields"
+      subject.pick(0,1)
+      expect(subject.inspect).not_to include "Not enough marked fields"
+    end
     it 'returns the game.' do
       expect(subject.pick(0,1)).to eq subject
     end
@@ -39,6 +53,12 @@ RSpec.describe Game do
     it 'unmarks the field at x,y of table.' do
       subject.unmark(0,0)
       expect(subject.table[0,0]).to be_untouched
+    end
+    it 'empties message.' do
+      subject.pick_around(0,0)
+      expect(subject.inspect).to include "Not enough marked fields"
+      subject.unmark(0,1)
+      expect(subject.inspect).not_to include "Not enough marked fields"
     end
     it 'returns the game.' do
       expect(subject.unmark(0,1)).to eq subject
@@ -106,13 +126,13 @@ RSpec.describe Game do
     end
   end
 
-  describe '#lose' do
+  describe '#lose (private)' do
     it 'writes lose.' do
-      expect(subject.lose).to eq("Loser")
+      expect(subject.send(:lose)).to eq("Loser")
     end
     it 'changes the untouched fields to picked.' do
       untouched_fields = subject.table.each_field.select &:untouched?
-      expect { subject.lose }.to change { untouched_fields.all? &:picked? }.to(true)
+      expect { subject.send(:lose) }.to change { untouched_fields.all? &:picked? }.to(true)
     end
     it 'shows ! for marked fields that are not mines.' do
       table = Table.new(1,2,[[0,1]], subject)
@@ -134,13 +154,13 @@ RSpec.describe Game do
     end
   end
 
-  describe '#win' do
+  describe '#win (private)' do
     it 'writes win.' do
-      expect(subject.win).to eq("Winner")
+      expect(subject.send(:win)).to eq("Winner")
     end
     it 'changes mines field if it is not marked' do
       mines_fields = subject.table.each_field.select &:untouched?
-      expect { subject.win }.to change { mines_fields.all? &:marked? }.to(true)
+      expect { subject.send(:win) }.to change { mines_fields.all? &:marked? }.to(true)
     end
   end
 
@@ -152,6 +172,17 @@ RSpec.describe Game do
       subject.pick(1,0)
       untouched_fields_around = subject.table.each_coordinate_around(1,0).with_object([]) { |(x,y), fields| fields << table[x,y] if table[x,y].untouched? }
       expect { subject.pick_around(1,0) }.to change { untouched_fields_around.all? &:picked? }.to true
+    end
+    it 'empties message.' do
+      table = Table.new(3,3, [[1,0],[2,2]], subject)
+      subject.instance_variable_set :@table, table
+      subject.pick(0,0)
+      subject.pick(1,1)
+      subject.mark(1,0)
+      subject.pick_around(1,1)
+      expect(subject.inspect).to include "Not enough marked fields"
+      subject.pick_around(0,0)
+      expect(subject.inspect).not_to include "Not enough marked fields"
     end
     it 'writes Not enough marked fields.' do
       subject.instance_variable_set :@table, table
@@ -191,6 +222,7 @@ RSpec.describe Game do
                                     "+---+---+\n" +
                                     "Loser")
     end
+
     it 'returns the game.' do
       expect(subject.pick_around(0,1)).to eq subject
     end
@@ -201,22 +233,22 @@ RSpec.describe Game do
       expect(subject).to be_running
     end
     it 'returns false if the player win the game.' do
-      subject.win
+      subject.send(:win)
       expect(subject.running?).to be false
     end
     it 'reutrns false if the player lose the game.' do
-      subject.lose
+      subject.send(:lose)
       expect(subject.running?).to be false
     end
   end
 
   describe '#ended?' do
     it 'returns true if the player win the game.' do
-      subject.win
+      subject.send(:win)
       expect(subject.ended?).to be true
     end
     it 'reutrns true if the player lose the game.' do
-      subject.lose
+      subject.send(:lose)
       expect(subject.ended?).to be true
     end
     it 'returns false if state is not ended.' do

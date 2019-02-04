@@ -1,7 +1,8 @@
 require './main'
 
 RSpec.describe Table do
-  let(:table) { Table.new(3,3,[[1,2],[2,0]]) }
+  let(:table) { Table.new(3,3,[[1,2],[2,0]], game) }
+  let(:game) { Game.new(3,3,2) }
 
   it "#mines_count_around" do
     expect(table.mines_count_around(0,0)).to eq(0)
@@ -107,7 +108,7 @@ RSpec.describe Table do
       expect { table.pick(0,0) }.to change { fields.all? &:picked? }.to true
     end
     it 'calls pick_around again, if a new picked field is zero.' do
-      table = Table.new(3,3, [[2,1]])
+      table = Table.new(3,3, [[2,1]], game)
       fields = [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]].map { |(x,y)| table[x,y] }
       expect { table.pick(0,0) }.to change { fields.all? &:picked? }.to true
     end
@@ -154,7 +155,7 @@ RSpec.describe Table do
 
   describe '.create' do
     it 'returns Table instance, calls generate_grid, chose some coordinates.' do
-      table = Table.create(4,5,6)
+      table = Table.create(4,5,6, game)
       mine_coordinates = table.instance_variable_get(:@mine_coordinates)
       expect(mine_coordinates.size).to eq(6)
       expect(mine_coordinates).to be_an_instance_of(Array)

@@ -33,6 +33,7 @@ class Game
     define_method(method) do |x,y|
 #     raise NoTableError if @table.nil?
       table.send(method, x, y) if running?
+      @message = ""
       self
     end
   end
@@ -44,6 +45,8 @@ class Game
         lose
       elsif table.each_field.count(&:untouched?) == table.unmarked_mines_count
         win
+      else
+        @message = ""
       end
     end
     self
@@ -58,6 +61,15 @@ class Game
     self
   end
 
+
+  [:running, :ended].each do |method|
+     define_method "#{method}?" do
+       @state == method
+     end
+   end
+
+  private
+
   def win
     @state = :ended
     table.each_field &:mark
@@ -69,11 +81,5 @@ class Game
     table.each_field &:pick
     @message = "Loser"
   end
-
-  [:running, :ended].each do |method|
-     define_method "#{method}?" do
-       @state == method
-     end
-   end
 
 end
