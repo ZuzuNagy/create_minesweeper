@@ -5,18 +5,19 @@ class Table
 
   attr_reader :grid
 
-  def initialize rows, cols, mine_coordinates
+  def initialize rows, cols, mine_coordinates, game
     @rows = rows
     @cols = cols
     @mine_coordinates = mine_coordinates
+    @game = game
     @grid = create_grid
   end
 
   class << self
 
-    def create rows, cols, mines_count
+    def create rows, cols, mines_count, game
       mine_coordinates = coordinates_for(rows, cols).sample(mines_count)
-      new(rows, cols, mine_coordinates)
+      new(rows, cols, mine_coordinates, game)
     end
 
     def coordinates_for rows, cols
@@ -42,7 +43,8 @@ class Table
       end
       t.style = {:all_separators => true}
     end
-    "#{@mine_coordinates.size - each_field.count { |field| field.marked? }}\n#{table}"
+    "#{unmarked_mines_count}\n#{table}"
+#    "#{@mine_coordinates.size - each_field.count { |field| field.marked? }}\n#{table}"
   end
 
   [:mark, :unmark].each do |method|
@@ -153,12 +155,12 @@ class Table
   def create_grid
     grid = Array.new(@rows) { Array.new(@cols) }
     @mine_coordinates.each do |(x,y)|
-      grid[x][y] = Field.new('x', self)
+      grid[x][y] = Field.new('x', @game)
     end
     @rows.times do |x|
       @cols.times do |y|
         if grid[x][y].nil?
-          grid[x][y] = Field.new(mines_count_around(x,y), self)
+          grid[x][y] = Field.new(mines_count_around(x,y), @game)
         end
       end
     end

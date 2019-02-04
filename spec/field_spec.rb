@@ -1,7 +1,8 @@
 require './main'
 
 RSpec.describe Field do
-  let(:table) { Table.new(1, 1, []) }
+  let(:game) { Game.new(1,1,0) }
+  let(:table) { game.table }
   let(:field) { Field.new(0, table) }
 
   describe "#state" do
@@ -76,22 +77,49 @@ RSpec.describe Field do
     end
   end
 
-  describe "#inspect" do
-    it 'returns " " if state is :untouched.' do
-      expect(field.inspect).to eq(" ")
-    end
+  xdescribe "#inspect" do
+    context '.game==running' do
+      it 'returns " " if state is :untouched.' do
+        expect(field.inspect).to eq(" ")
+      end
 
-    it 'returns "M" if state is :marked.' do
-      field.mark
-      expect(field.inspect).to eq("M")
-    end
+      it 'returns "M" if state is :marked.' do
+        field.mark
+        expect(field.inspect).to eq("M")
+      end
 
-    it 'returns the value if state is :picked.' do
-      field.pick
-      expect(field.inspect).to eq("0")
-      field = Field.new('x', table)
-      field.pick
-      expect(field.inspect).to eq("x")
+      it 'returns the value if state is :picked.' do
+        field.pick
+        expect(field.inspect).to eq("0")
+        field = Field.new('x', table)
+        field.pick
+        expect(field.inspect).to eq("x")
+      end
+    end
+    context '.game==ended' do
+      it 'retuns the value, if state is :untouched.' do
+        expect(field.inspect).to eq("0")
+        field = Field.new('x', table)
+        expect(field.inspect).to eq("x")
+      end
+      it 'returns "M" or "!" if the state is :marked.' do
+        table = Table.new(1,2,[[0,0]], game)
+        field.mark(0,0)
+        expect(field.inspect).to eq("M")
+
+        table = Table.new(1,2,[[0,0]], game)
+        field.mark(0,1)
+        expect(field.inspect).to eq("!")
+      end
+      it 'returns the value or X if state is :picked.' do
+        table = Table.new(1,2,[[0,0]], game)
+        field.pick(0,1)
+        expect(field.inspect).to eq("1")
+
+        table = Table.new(1,2,[[0,0]], game)
+        field.pick(0,0)
+        expect(field.inspect).to eq("X")
+      end
     end
   end
 

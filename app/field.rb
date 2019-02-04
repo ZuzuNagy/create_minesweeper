@@ -1,9 +1,9 @@
 class Field
 
-  def initialize value, table
-    @state = 0
+  def initialize value, game
+    send(:state=, :untouched)
     @value = value
-    @table = table
+    @game = game
   end
 
   def value
@@ -35,10 +35,18 @@ class Field
   end
 
   def inspect
-    case @state
-    when 0 then " "
-    when 1 then "M"
-    when 2 then @value.to_s
+    if @game.running?
+      case @state
+      when 0 then " "
+      when 1 then "M"
+      when 2 then @value.to_s.upcase
+      end
+    else
+      case @state
+      when 0 then @value.to_s
+      when 1 then @value == 'x' ? "M" : "!"
+      when 2 then @value.to_s.upcase
+      end
     end
   end
 

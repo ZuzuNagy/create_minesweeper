@@ -19,13 +19,13 @@ RSpec.describe Game do
       expect(subject.table[0,1]).to be_picked
     end
     it 'calls lose if picked field is mine.' do
-      table = Table.new(2,2,[[0,0]])
+      table = Table.new(2,2,[[0,0]],subject)
       subject.instance_variable_set :@table, table
       expect(subject).to receive(:lose)
       subject.pick(0,0)
     end
     it 'calls win if every non-mine field is picked.' do
-      table = Table.new(1,2,[[0,0]])
+      table = Table.new(1,2,[[0,0]], subject)
       subject.instance_variable_set :@table, table
       expect(subject).to receive(:win)
       subject.pick(0,1)
@@ -78,17 +78,17 @@ RSpec.describe Game do
       expect(subject.inspect).to include("0\n")
     end
     it 'shows lose.' do
-      table = Table.new(1,2,[[0,1]])
+      table = Table.new(1,2,[[0,1]], subject)
       subject.instance_variable_set :@table, table
       subject.pick(0,1)
       expect(subject.inspect).to eq("1\n" +
                                     "+---+---+\n" +
-                                    "| 1 | x |\n" +
+                                    "| 1 | X |\n" +
                                     "+---+---+\n" +
                                     "Loser")
     end
     it 'shows win.' do
-      table = Table.new(1,2,[[0,1]])
+      table = Table.new(1,2,[[0,1]],subject)
       subject.instance_variable_set :@table, table
       subject.pick(0,0)
       expect(subject.inspect).to eq("0\n" +
@@ -101,7 +101,7 @@ RSpec.describe Game do
 
   describe '#table' do
     it 'is an attr_reader.' do
-      table = Table.new(1,2,[])
+      table = Table.new(1,2,[],subject)
       expect { subject.instance_variable_set(:@table, table) }.to change(subject, :table).to table
     end
   end
@@ -115,20 +115,19 @@ RSpec.describe Game do
       expect { subject.lose }.to change { untouched_fields.all? &:picked? }.to(true)
     end
     it 'shows ! for marked fields that are not mines.' do
-      table = Table.new(1,2,[[0,1]])
+      table = Table.new(1,2,[[0,1]], subject)
       subject.instance_variable_set :@table, table
       subject.mark(0,0)
       subject.pick(0,1)
-      p subject
       expect(subject.inspect).to eq("0\n" +
                                     "+---+---+\n" +
-                                    "| ! | x |\n" +
+                                    "| ! | X |\n" +
                                     "+---+---+\n" +
                                     "Loser")
     end
     it 'does not go to win.' do
       should_not receive(:win)
-      table = Table.new(1,2,[[0,1]])
+      table = Table.new(1,2,[[0,1]], subject)
       subject.instance_variable_set :@table, table
       subject.mark(0,0)
       subject.pick(0,1)
@@ -146,7 +145,7 @@ RSpec.describe Game do
   end
 
   describe '#pick_around' do
-    let(:table) { Table.new(2,2,[[1,1]]) }
+    let(:table) { Table.new(2,2,[[1,1]],subject) }
     it 'changes x,y field around state, if x,y value eq marked fields around.' do
       subject.instance_variable_set :@table, table
       subject.mark(1,1)
@@ -188,12 +187,40 @@ RSpec.describe Game do
                                     "+---+---+\n" +
                                     "| 1 | 1 |\n" +
                                     "+---+---+\n" +
-                                    "| M | x |\n" +
+                                    "| ! | X |\n" +
                                     "+---+---+\n" +
                                     "Loser")
     end
     it 'returns the game.' do
       expect(subject.pick_around(0,1)).to eq subject
+    end
+  end
+
+  describe "#running?" do
+    it 'returns true if sate is running.' do
+      expect(subject).to be_running
+    end
+    it 'returns false if the player win the game.' do
+      subject.win
+      expect(subject.running?).to be false
+    end
+    it 'reutrns false if the player lose the game.' do
+      subject.lose
+      expect(subject.running?).to be false
+    end
+  end
+
+  describe '#ended?' do
+    it 'returns true if the player win the game.' do
+      subject.win
+      expect(subject.ended?).to be true
+    end
+    it 'reutrns true if the player lose the game.' do
+      subject.lose
+      expect(subject.ended?).to be true
+    end
+    it 'returns false if state is not ended.' do
+      expect(subject).not_to be_ended
     end
   end
 end

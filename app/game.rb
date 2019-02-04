@@ -18,7 +18,8 @@ class Game
   attr_reader :table
 
   def initialize rows, cols, mines_count
-    @table = Table.create(rows, cols, mines_count)
+    @table = Table.create(rows, cols, mines_count, self)
+    @state = :running
   end
 
   def inspect
@@ -26,20 +27,24 @@ class Game
     "\n#{@message}"
   end
 
+
+
   [:mark, :unmark].each do |method|
     define_method(method) do |x,y|
 #     raise NoTableError if @table.nil?
-      table.send(method, x, y)
+      table.send(method, x, y) if running?
       self
     end
   end
 
   def pick x,y
-    table.pick(x,y)
-    if table[x,y].value == "x"
-      lose
-    elsif table.each_field.count(&:untouched?) == table.unmarked_mines_count
-      win
+    if running?
+      table.pick(x,y)
+      if table[x,y].value == "x"
+        lose
+      elsif table.each_field.count(&:untouched?) == table.unmarked_mines_count
+        win
+      end
     end
     self
   end
@@ -54,15 +59,21 @@ class Game
   end
 
   def win
+    @state = :ended
     table.each_field &:mark
     @message = "Winner"
   end
 
   def lose
-    table.each_field do |field|
-      field.pick
-
-    end
+    @state = :ended
+    table.each_field &:pick
     @message = "Loser"
   end
+
+  [:running, :ended].each do |method|
+     define_method "#{method}?" do
+       @state == method
+     end
+   end
+
 end
