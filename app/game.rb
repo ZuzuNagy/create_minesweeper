@@ -18,16 +18,27 @@ class Game
   attr_reader :table
 
   def initialize rows, cols, mines_count
-    @table = Table.create(rows, cols, mines_count, self)
+    @rows = rows
+    @cols = cols
+    @mines_count = mines_count
+    @table = nil
     @state = :running
+    @first = true
   end
 
   def inspect
-    table.inspect +
-    "\n#{@message}"
+    if table.nil?
+      fake_table = Terminal::Table.new do |t|
+        @rows.times do
+          t << @cols.times.map { ' ' }
+        end
+        t.style = {:all_separators => true}
+      end
+      "#{@mines_count}\n#{fake_table}"
+    else
+      table.inspect + "\n#{@message}"
+    end
   end
-
-
 
   [:mark, :unmark].each do |method|
     define_method(method) do |x,y|
@@ -40,7 +51,13 @@ class Game
 
   def pick x,y
     if running?
+      if @first
+        @table = Table.create(@rows, @cols, @mines_count, [x,y], self)
+        @first = false
+      end
+
       table.pick(x,y)
+
       if table[x,y].value == "x"
         lose
       elsif table.each_field.count(&:untouched?) == table.unmarked_mines_count

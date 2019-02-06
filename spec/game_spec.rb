@@ -2,24 +2,33 @@ require './main'
 
 RSpec.describe Game do
   subject { Game.new(3,3,2) }
+  before :each do
+    subject.pick(0,0)
+  end
 
   describe '#mark' do
     it 'marks the field at x,y of table.' do
-      subject.mark(0,0)
-      expect(subject.table[0,0]).to be_marked
+      subject.mark(2,2)
+      expect(subject.table[2,2]).to be_marked
     end
     it 'empties message.' do
+      table = Table.new(3,3,[[0,1],[2,2]], subject)
+      subject.instance_variable_set :@table, table
       subject.pick_around(0,0)
       expect(subject.inspect).to include "Not enough marked fields"
       subject.mark(0,1)
       expect(subject.inspect).not_to include "Not enough marked fields"
     end
     it 'returns the game.' do
-      expect(subject.mark(0,0)).to eq subject
+      expect(subject.mark(0,1)).to eq subject
     end
   end
 
   describe '#pick' do
+    it 'creats a new table, after first pick.' do
+      game = Game.new(3,3,2)
+      expect { game.pick(0,0) }.to change(game, :table).from(nil).to be_an_instance_of Table
+    end
     it 'picks the field at x,y of table.' do
       subject.pick(0,1)
       expect(subject.table[0,1]).to be_picked
@@ -51,10 +60,12 @@ RSpec.describe Game do
 
   describe '#unmark' do
     it 'unmarks the field at x,y of table.' do
-      subject.unmark(0,0)
-      expect(subject.table[0,0]).to be_untouched
+      subject.unmark(2,2)
+      expect(subject.table[2,2]).to be_untouched
     end
     it 'empties message.' do
+      table = Table.new(3,3,[[0,1],[2,2]], subject)
+      subject.instance_variable_set :@table, table
       subject.pick_around(0,0)
       expect(subject.inspect).to include "Not enough marked fields"
       subject.unmark(0,1)
@@ -80,6 +91,7 @@ RSpec.describe Game do
 
   describe "#inspect" do
     it 'draws a table.' do
+      game = Game.new 3,3,2
       drawn_table =
         "+---+---+---+\n" +
         "|   |   |   |\n" +
@@ -88,14 +100,17 @@ RSpec.describe Game do
         "+---+---+---+\n" +
         "|   |   |   |\n" +
         "+---+---+---+"
-      expect(subject.inspect).to include drawn_table
+      expect(game.inspect).to include drawn_table
     end
     it 'shows the number of unmarked mines.' do
-      expect(subject.inspect).to include("2\n")
-      subject.mark(1,2)
-      expect(subject.inspect).to include("1\n")
-      subject.mark(0,0)
-      expect(subject.inspect).to include("0\n")
+      game = Game.new 3,3,2
+      expect(game.inspect).to include("2\n")
+      table = Table.new(3,3,[[0,1], [2,2]], game)
+      game.instance_variable_set :@table, table
+      game.mark(1,2)
+      expect(game.inspect).to include("1\n")
+      game.mark(2,2)
+      expect(game.inspect).to include("0\n")
     end
     it 'shows lose.' do
       table = Table.new(1,2,[[0,1]], subject)

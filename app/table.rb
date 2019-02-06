@@ -15,8 +15,8 @@ class Table
 
   class << self
 
-    def create rows, cols, mines_count, game
-      mine_coordinates = coordinates_for(rows, cols).sample(mines_count)
+    def create rows, cols, mines_count, not_mine, game
+      mine_coordinates = (coordinates_for(rows, cols) - [not_mine]).sample(mines_count)
       new(rows, cols, mine_coordinates, game)
     end
 

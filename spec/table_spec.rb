@@ -155,12 +155,17 @@ RSpec.describe Table do
 
   describe '.create' do
     it 'returns Table instance, calls generate_grid, chose some coordinates.' do
-      table = Table.create(4,5,6, game)
+      table = Table.create(4,5,6,[0,0], game)
       mine_coordinates = table.instance_variable_get(:@mine_coordinates)
       expect(mine_coordinates.size).to eq(6)
       expect(mine_coordinates).to be_an_instance_of(Array)
       all_inside = mine_coordinates.all? { |coor| coor[0] >= 0 && coor[1] >= 0 && coor[0] < 4 && coor[1] < 5 }
       expect(all_inside).to be true
+    end
+    it 'has no mine on "not_mine" coordinates.' do
+      table = Table.create(3,3,9,[0,0], game)
+      table.pick(0,0)
+      expect(table[0,0].value).not_to eq 'x'
     end
   end
 
