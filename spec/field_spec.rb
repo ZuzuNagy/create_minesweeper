@@ -2,8 +2,8 @@ require './main'
 
 RSpec.describe Field do
   let(:game) { Game.new(1,1,0) }
-  let(:table) { game.table }
-  let(:field) { Field.new(0, table) }
+  # let(:table) { game.table }
+  let(:field) { Field.new(0, game) }
 
   describe "#state" do
     it 'is :untouched when initialized.' do
@@ -77,7 +77,7 @@ RSpec.describe Field do
     end
   end
 
-  xdescribe "#inspect" do
+  describe "#inspect" do
     context '.game==running' do
       it 'returns " " if state is :untouched.' do
         expect(field.inspect).to eq(" ")
@@ -87,37 +87,41 @@ RSpec.describe Field do
         field.mark
         expect(field.inspect).to eq("M")
       end
-
+      # TODO ilyen nincs
       it 'returns the value if state is :picked.' do
         field.pick
         expect(field.inspect).to eq("0")
-        field = Field.new('x', table)
+        field = Field.new('x', game)
         field.pick
-        expect(field.inspect).to eq("x")
+        expect(field.inspect).to eq("X")
       end
     end
     context '.game==ended' do
+      before :each do
+        game.instance_variable_set :@state, :ended
+      end
+
       it 'retuns the value, if state is :untouched.' do
         expect(field.inspect).to eq("0")
-        field = Field.new('x', table)
+        field = Field.new('x', game)
         expect(field.inspect).to eq("x")
       end
       it 'returns "M" or "!" if the state is :marked.' do
-        table = Table.new(1,2,[[0,0]], game)
-        field.mark(0,0)
+        field = Field.new('x', game)
+        field.mark
         expect(field.inspect).to eq("M")
 
-        table = Table.new(1,2,[[0,0]], game)
-        field.mark(0,1)
+        field = Field.new(2, game)
+        field.mark
         expect(field.inspect).to eq("!")
       end
       it 'returns the value or X if state is :picked.' do
-        table = Table.new(1,2,[[0,0]], game)
-        field.pick(0,1)
+        field = Field.new(1, game)
+        field.pick
         expect(field.inspect).to eq("1")
 
-        table = Table.new(1,2,[[0,0]], game)
-        field.pick(0,0)
+        field = Field.new('x', game)
+        field.pick
         expect(field.inspect).to eq("X")
       end
     end
