@@ -1,6 +1,7 @@
 require 'singleton'
 
 class Game
+  include TextColor
 #  include Singleton
 
 #  class NoTableError < StandardError; end
@@ -73,7 +74,7 @@ class Game
     if table[x,y].value&. <= table.marked_count_around(x,y)
       table.each_coordinate_around(x,y) { |coordinate| pick(*coordinate) }
     else
-      @message = "Not enough marked fields"
+      @message = color "Not enough marked fields"
     end
     self
   end
@@ -90,13 +91,19 @@ class Game
   def win
     @state = :ended
     table.each_field &:mark
-    @message = "Winner"
+    @message = color "Winner"
   end
 
   def lose
     @state = :ended
-    table.each_field &:pick
-    @message = "Loser"
+  #  table.each_field do |filed|
+  #   if field.pick.value  'x'
+  #     field = 'x'
+  #   else
+  #     field.pick
+  #   end
+  #  end
+    @message = color "Loser"
   end
 
 end

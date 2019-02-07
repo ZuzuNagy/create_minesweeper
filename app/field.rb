@@ -1,4 +1,5 @@
 class Field
+  include TextColor
 
   def initialize value, game
     send(:state=, :untouched)
@@ -38,14 +39,14 @@ class Field
     if @game.running?
       case @state
       when 0 then " "
-      when 1 then "M"
-      when 2 then @value.to_s.upcase
+      when 1 then color "M"
+      when 2 then color @value.to_s.upcase
       end
     else
       case @state
-      when 0 then @value.to_s
-      when 1 then @value == 'x' ? "M" : "!"
-      when 2 then @value.to_s.upcase
+      when 0 then color @value.to_s
+      when 1 then color @value == 'x' ? "M" : "!"
+      when 2 then color @value.to_s.upcase
       end
     end
   end

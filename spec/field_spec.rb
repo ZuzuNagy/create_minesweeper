@@ -85,44 +85,44 @@ RSpec.describe Field do
 
       it 'returns "M" if state is :marked.' do
         field.mark
-        expect(field.inspect).to eq("M")
+        expect(field.inspect).to eq("\u001b[31;1mM\u001b[0m")
       end
       # TODO ilyen nincs
       it 'returns the value if state is :picked.' do
         field.pick
-        expect(field.inspect).to eq("0")
+        expect(field.inspect).to eq("\u001b[32m0\u001b[0m")
         field = Field.new('x', game)
         field.pick
-        expect(field.inspect).to eq("X")
+        expect(field.inspect).to eq("\u001b[31mX\u001b[0m")
       end
     end
-    context '.game==ended' do
+    context 'changes the game status ended' do
       before :each do
         game.instance_variable_set :@state, :ended
       end
 
       it 'retuns the value, if state is :untouched.' do
-        expect(field.inspect).to eq("0")
+        expect(field.inspect).to eq("\u001b[32m0\u001b[0m")
         field = Field.new('x', game)
-        expect(field.inspect).to eq("x")
+        expect(field.inspect).to eq("\u001b[31mx\u001b[0m")
       end
       it 'returns "M" or "!" if the state is :marked.' do
         field = Field.new('x', game)
         field.mark
-        expect(field.inspect).to eq("M")
+        expect(field.inspect).to eq("\u001b[31;1mM\u001b[0m")
 
         field = Field.new(2, game)
         field.mark
-        expect(field.inspect).to eq("!")
+        expect(field.inspect).to eq("\u001b[33m!\u001b[0m")
       end
       it 'returns the value or X if state is :picked.' do
         field = Field.new(1, game)
         field.pick
-        expect(field.inspect).to eq("1")
+        expect(field.inspect).to eq("\u001b[32m1\u001b[0m")
 
         field = Field.new('x', game)
         field.pick
-        expect(field.inspect).to eq("X")
+        expect(field.inspect).to eq("\u001b[31mX\u001b[0m")
       end
     end
   end

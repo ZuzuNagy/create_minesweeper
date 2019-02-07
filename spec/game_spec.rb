@@ -120,7 +120,7 @@ RSpec.describe Game do
                                     "+---+---+\n" +
                                     "| 1 | X |\n" +
                                     "+---+---+\n" +
-                                    "Loser")
+                                    "\u001b[31mLoser\u001b[0m")
     end
     it 'shows win.' do
       table = Table.new(1,2,[[0,1]],subject)
@@ -130,7 +130,7 @@ RSpec.describe Game do
                                     "+---+---+\n" +
                                     "| 1 | M |\n" +
                                     "+---+---+\n" +
-                                    "Winner")
+                                    "\u001b[31mWinner\u001b[0m")
     end
   end
 
@@ -143,7 +143,7 @@ RSpec.describe Game do
 
   describe '#lose (private)' do
     it 'writes lose.' do
-      expect(subject.send(:lose)).to eq("Loser")
+      expect(subject.send(:lose)).to eq("\u001b[31mLoser\u001b[0m")
     end
     it 'changes the untouched fields to picked.' do
       untouched_fields = subject.table.each_field.select &:untouched?
@@ -158,7 +158,7 @@ RSpec.describe Game do
                                     "+---+---+\n" +
                                     "| ! | X |\n" +
                                     "+---+---+\n" +
-                                    "Loser")
+                                    "\u001b[31mLoser\u001b[0m")
     end
     it 'does not go to win.' do
       should_not receive(:win)
@@ -171,7 +171,7 @@ RSpec.describe Game do
 
   describe '#win (private)' do
     it 'writes win.' do
-      expect(subject.send(:win)).to eq("Winner")
+      expect(subject.send(:win)).to eq("\u001b[32mWinner\u001b[0m")
     end
     it 'changes mines field if it is not marked' do
       mines_fields = subject.table.each_field.select &:untouched?
@@ -195,9 +195,9 @@ RSpec.describe Game do
       subject.pick(1,1)
       subject.mark(1,0)
       subject.pick_around(1,1)
-      expect(subject.inspect).to include "Not enough marked fields"
+      expect(subject.inspect).to include "\u001b[33mNot enough marked fields\u001b[0m"
       subject.pick_around(0,0)
-      expect(subject.inspect).not_to include "Not enough marked fields"
+      expect(subject.inspect).not_to include "\u001b[33mNot enough marked fields\u001b[0m"
     end
     it 'writes Not enough marked fields.' do
       subject.instance_variable_set :@table, table
@@ -209,7 +209,7 @@ RSpec.describe Game do
                                     "+---+---+\n" +
                                     "| 1 |   |\n" +
                                     "+---+---+\n" +
-                                    "Not enough marked fields")
+                                    "\u001b[33mNot enough marked fields\u001b[0m")
     end
     it 'calls win, if no more untouched non-mine fields.' do
       subject.instance_variable_set :@table, table
@@ -222,7 +222,7 @@ RSpec.describe Game do
                                     "+---+---+\n" +
                                     "| 1 | M |\n" +
                                     "+---+---+\n" +
-                                    "Winner")
+                                    "\u001b[32mWinner\u001b[0m")
     end
     it 'calls lose if x,y around has unmarked mines.' do
       subject.instance_variable_set :@table, table
@@ -235,7 +235,7 @@ RSpec.describe Game do
                                     "+---+---+\n" +
                                     "| ! | X |\n" +
                                     "+---+---+\n" +
-                                    "Loser")
+                                    "\u001b[31mLoser\u001b[0m")
     end
 
     it 'returns the game.' do
